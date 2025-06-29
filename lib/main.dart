@@ -1,13 +1,18 @@
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:slido/Providers/shared_preferences_provider.dart';
-import 'package:slido/consts.dart';
-import 'package:slido/screen/auth/auth.dart';
-import 'package:slido/screen/home_screen.dart';
 import 'package:slido/firebase_options.dart';
+import 'package:slido/util/email_getter.dart';
+import 'screen/landing/landing_screen.dart';
+// import 'screen/landing/create_quiz_screen.dart';
+import 'screen/landing/join_quiz_screen.dart';
+// import 'screen/landing/past_results_screen.dart';
+import 'package:slido/screen/auth/auth.dart';
+import 'core/theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +21,7 @@ Future<void> main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     runApp(
       ProviderScope(
@@ -25,23 +31,29 @@ Future<void> main() async {
         child: const MyApp(),
       ),
     );
-
-    // runApp(const MyApp());
   });
 }
 
 class MyApp extends ConsumerWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isAuthenticated = ref.watch(isAuthenticatedProvider);
-
+    // final auth = FirebaseAuth.instance;
+    // final email = auth.currentUser?.email;
+    // print(EMAIL);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      home: isAuthenticated ? HomeScreen() : Auth(),
+      title: 'Quiz App',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
+      home: EMAIL != null ? const LandingScreen() : const Auth(),
+      routes: {
+        // '/createQuiz': (context) => const CreateQuizScreen(),
+        '/joinQuiz': (context) => const JoinQuizScreen(),
+        // '/pastResults': (context) => const PastResultsScreen(),
+      },
     );
   }
 }

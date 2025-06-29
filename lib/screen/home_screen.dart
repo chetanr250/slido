@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:slido/Providers/shared_preferences_provider.dart';
+// import 'package:slido/Providers/shared_preferences_provider.dart';
 import 'package:slido/screen/interaction/interactive_mode.dart';
 import 'package:slido/widgets/create_slido/add_questions.dart';
 import 'package:slido/widgets/home_screen/questions_list.dart';
 
 class HomeScreen extends ConsumerWidget {
-  const HomeScreen({Key? key});
+  const HomeScreen({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
@@ -30,7 +30,7 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             onPressed: () {
-              logout(ref, context);
+              // logout(ref, context);
             },
             icon: const Icon(Icons.logout),
           ),

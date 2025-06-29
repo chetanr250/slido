@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:slido/Providers/shared_preferences_provider.dart';
+import 'package:slido/util/email_getter.dart';
 
 final firebaseProvider = Provider((ref) => FirebaseFirestore.instance);
 
@@ -12,9 +13,7 @@ final firebaseInteractionProvider = Provider((ref) {
 });
 
 final firebaseUsersProvider = Provider((ref) {
-  return FirebaseFirestore.instance
-      .collection('users')
-      .doc(ref.read(emailProvider));
+  return FirebaseFirestore.instance.collection('users').doc(EMAIL);
 });
 
 final firebaseInteractionDataSnapshot = StreamProvider.autoDispose((ref) {

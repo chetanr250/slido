@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gap/gap.dart';
+// import 'package:gap/gap.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:slido/Providers/bottom_navigation_provider.dart';
 import 'package:slido/Providers/firebase_provider.dart';
@@ -38,6 +38,7 @@ class _InteractiveModeState extends ConsumerState<InteractiveMode> {
     var firebaseMainStore = FirebaseFirestore.instance.collection('main');
     var interactiveModeActiveStore = firebaseMainStore.doc('active');
     var dataFromFireActive = await interactiveModeActiveStore.get();
+
     String randomNumberString = '';
     // Creating a new room
     if (!dataFromFireActive.data()!.containsKey(email) ||
@@ -99,7 +100,7 @@ class _InteractiveModeState extends ConsumerState<InteractiveMode> {
       snack('You are already active\nCode: $code',
           context: context, color: Colors.green, duration: 2);
     }
-
+    initBottomNavigatorProvider(ref, mode);
     ref.read(codeNotifierProvider.notifier).setCode(code!);
     setState(() {
       isWaiting = false;
@@ -116,165 +117,92 @@ class _InteractiveModeState extends ConsumerState<InteractiveMode> {
     first();
   }
 
-  List<String> modes = ['question', 'answer', 'selections'];
-
   @override
   Widget build(BuildContext context) {
     final buttonState = ref.watch(bottomNavigationButtonProvider);
-    email = ref.read(emailProvider);
+    // email = ref.read(emailProvider);
     code = ref.watch(codeProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Interactive Mode'),
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  style: warningButtonStyle,
-                  child: const Icon(
-                    Icons.stop,
-                    color: Colors.white,
+      bottomNavigationBar: Consumer(
+        builder: (context, watch, child) {
+          final buttonState = ref.watch(bottomNavigationButtonProvider);
+          return buttonState.isEnabled
+              ? BottomAppBar(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      ElevatedButton(
+                        style: warningButtonStyle,
+                        child: const Icon(
+                          Icons.stop,
+                          color: Colors.white,
+                        ),
+                        onPressed: () =>
+                            stopInteractiveMode(context, ref, code, email),
+                      ),
+                      if (buttonState.isLeftEnabled)
+                        ElevatedButton.icon(
+                          iconAlignment: IconAlignment.start,
+                          onPressed:
+                              mode != 'waiting' && buttonState.isLeftEnabled
+                                  ? () {
+                                      leftNavigatorButtonFunction(modes, ref);
+                                    }
+                                  : null,
+                          style: buttonStyle(context),
+                          label: Text(
+                            buttonState.leftText,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          icon: const Icon(
+                            Icons.arrow_left_outlined,
+                            size: 35,
+                          ),
+                        ),
+                      if (buttonState.isRightEnabled)
+                        ElevatedButton.icon(
+                          iconAlignment: IconAlignment.end,
+                          onPressed: buttonState.isRightEnabled
+                              ? () {
+                                  if (mode == 'waiting') {
+                                    mode = 'question';
+                                    ref
+                                        .read(firebaseInteractionProvider)
+                                        .update({'mode': mode});
+
+                                    return;
+                                  }
+                                  modeIndex++;
+                                  if (modeIndex >= modes.length) {
+                                    modeIndex = 0;
+                                  }
+
+                                  mode = modes[modeIndex];
+
+                                  ref
+                                      .read(firebaseInteractionProvider)
+                                      .update({'mode': mode});
+                                }
+                              : null,
+                          style: buttonStyle(context),
+                          label: Text(
+                            buttonState.rightText,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          icon: const Icon(
+                            Icons.arrow_right_alt,
+                            size: 35,
+                          ),
+                        ),
+                    ],
                   ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: const Text('End Room'),
-                          content: const Text(
-                              'Are you sure you want to end the room?'),
-                          actions: <Widget>[
-                            TextButton(
-                              child: const Text('Cancel'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                            ElevatedButton(
-                              style: warningButtonStyle,
-                              child: const Text(
-                                'End',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                Navigator.pop(context);
-                                Future.delayed(Durations.short1, () {
-                                  FirebaseFirestore.instance
-                                      .collection('main')
-                                      .doc(code)
-                                      .delete();
-
-                                  FirebaseFirestore.instance
-                                      .collection('main')
-                                      .doc('active')
-                                      .set({
-                                    email!: '',
-                                  });
-                                });
-                                ref
-                                    .read(codeNotifierProvider.notifier)
-                                    .clearCode();
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                    return;
-                    Navigator.pop(context);
-                    Future.delayed(Durations.short1, () {
-                      FirebaseFirestore.instance
-                          .collection('main')
-                          .doc(code)
-                          .delete();
-
-                      FirebaseFirestore.instance
-                          .collection('main')
-                          .doc('active')
-                          .set({
-                        email!: '',
-                      });
-                    });
-                    ref.read(codeNotifierProvider.notifier).clearCode();
-                  },
-                ),
-                const Gap(8),
-                ElevatedButton.icon(
-                  iconAlignment: IconAlignment.start,
-                  onPressed: mode != 'waiting' && buttonState.isLeftEnabled
-                      ? () {
-                          modeIndex--;
-                          if (modeIndex < 0) {
-                            modeIndex = modes.length - 1;
-                          }
-                          setState(() {
-                            mode = modes[modeIndex];
-                          });
-                          ref
-                              .read(firebaseInteractionProvider)
-                              .update({'mode': mode});
-                        }
-                      : null,
-                  style: buttonStyle(context),
-                  label: Text(
-                    buttonState.leftText,
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  icon: const Icon(
-                    Icons.arrow_left_outlined,
-                    size: 35,
-                  ),
-                ),
-                const Gap(8),
-                Padding(
-                  padding: const EdgeInsets.all(0),
-                  child: ElevatedButton.icon(
-                    iconAlignment: IconAlignment.end,
-                    onPressed: buttonState.isRightEnabled
-                        ? () {
-                            if (mode == 'waiting') {
-                              mode = 'question';
-                              ref
-                                  .read(firebaseInteractionProvider)
-                                  .update({'mode': mode});
-
-                              return;
-                            }
-                            modeIndex++;
-                            if (modeIndex >= modes.length) {
-                              modeIndex = 0;
-                            }
-
-                            mode = modes[modeIndex];
-
-                            ref
-                                .read(firebaseInteractionProvider)
-                                .update({'mode': mode});
-                          }
-                        : null,
-                    style: buttonStyle(context),
-                    label: Text(
-                      buttonState.rightText,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    icon: const Icon(
-                      Icons.arrow_right_alt,
-                      size: 35,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+                )
+              : SizedBox.shrink();
+        },
       ),
       body: !isWaiting
           ? StreamBuilder(
@@ -349,4 +277,80 @@ class _InteractiveModeState extends ConsumerState<InteractiveMode> {
             ),
     );
   }
+}
+
+void initBottomNavigatorProvider(ref, mode) {
+  final modeIndex = modes.indexOf(mode);
+  ref.read(bottomNavigationButtonProvider.notifier).state =
+      BottomNavigationButtonState(
+    isLeftEnabled: mode == 'waiting' ? false : true,
+    isRightEnabled: true,
+    leftText: 'Previous',
+    rightText: mode == 'waiting' ? 'Start' : 'Next',
+    modeIndex: modeIndex,
+    isEnabled: true,
+  );
+}
+
+void leftNavigatorButtonFunction(modes, ref) {
+  // final modeIndex = ref.read(bottomNavigationButtonProvider.notifier)
+  var modeIndex = ref.read(bottomNavigationButtonProvider).modeIndex ?? 0;
+  var mode = modes[modeIndex];
+  ref.read(bottomNavigationButtonProvider.notifier).decrementModeIndex();
+  // print(mode);
+  // print(modeIndex);
+  if (modeIndex < 0) {
+    modeIndex = modes.length - 1;
+  }
+  // setState(() {
+  //   mode = modes[modeIndex];
+  // });
+  ref.read(firebaseInteractionProvider).update({'mode': mode});
+}
+
+void stopInteractiveMode(context, ref, code, email) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('End Room'),
+        content: const Text('Are you sure you want to end the room?'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          ElevatedButton(
+            style: warningButtonStyle,
+            child: const Text(
+              'End',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.pop(context);
+              Future.delayed(Durations.short1, () {
+                FirebaseFirestore.instance
+                    .collection('main')
+                    .doc(code)
+                    .delete();
+
+                FirebaseFirestore.instance
+                    .collection('main')
+                    .doc('active')
+                    .set({
+                  email!: '',
+                });
+              });
+              ref.read(codeNotifierProvider.notifier).clearCode();
+            },
+          ),
+        ],
+      );
+    },
+  );
 }

@@ -71,7 +71,7 @@ final lightTheme = FlexThemeData.light(
     ),
   ),
 );
-
+const List<String> modes = ['question', 'answer', 'selections'];
 final warningButtonStyle = ButtonStyle(
   side: MaterialStateProperty.all(
     const BorderSide(color: Colors.white, width: 1),

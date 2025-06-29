@@ -1,42 +1,61 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class BottomNavigationButtonState {
-  final bool isLeftEnabled;
-  final bool isRightEnabled;
-  final String leftText;
-  final String rightText;
+  bool isLeftEnabled;
+  bool isRightEnabled;
+  String leftText;
+  String rightText;
+  int modeIndex;
+  bool isEnabled;
 
-  BottomNavigationButtonState(
-      {required this.isLeftEnabled,
-      required this.isRightEnabled,
-      required this.leftText,
-      required this.rightText});
+  BottomNavigationButtonState({
+    required this.isLeftEnabled,
+    required this.isRightEnabled,
+    required this.leftText,
+    required this.rightText,
+    this.modeIndex = 0,
+    required this.isEnabled,
+  });
 }
 
 class BottomNavigationButtonNotifier
     extends StateNotifier<BottomNavigationButtonState> {
   BottomNavigationButtonNotifier()
       : super(BottomNavigationButtonState(
-            isLeftEnabled: true,
-            isRightEnabled: true,
-            leftText: 'Left Button',
-            rightText: 'Right Button'));
+          isLeftEnabled: true,
+          isRightEnabled: true,
+          leftText: 'Left Button',
+          rightText: 'Right Button',
+          isEnabled: true,
+        ));
 
-  void toggleButton() {
-    state = BottomNavigationButtonState(
-        isLeftEnabled: !state.isLeftEnabled,
-        isRightEnabled: !state.isRightEnabled,
-        leftText: state.leftText,
-        rightText: state.rightText);
-  }
+  // void toggleButton() {
+  //   state = BottomNavigationButtonState(
+  //       isLeftEnabled: !state.isLeftEnabled,
+  //       isRightEnabled: !state.isRightEnabled,
+  //       leftText: state.leftText,
+  //       rightText: state.rightText);
+  // }
 
   void updateText(String newText) {
     state = BottomNavigationButtonState(
-        isLeftEnabled: state.isLeftEnabled,
-        isRightEnabled: state.isRightEnabled,
-        leftText: newText,
-        rightText: state.rightText);
+      isLeftEnabled: state.isLeftEnabled,
+      isRightEnabled: state.isRightEnabled,
+      leftText: newText,
+      rightText: state.rightText,
+      isEnabled: state.isEnabled,
+    );
+  }
+
+  void decrementModeIndex() {
+    state = BottomNavigationButtonState(
+      isLeftEnabled: state.isLeftEnabled,
+      isRightEnabled: state.isRightEnabled,
+      leftText: state.leftText,
+      rightText: state.rightText,
+      modeIndex: state.modeIndex - 1,
+      isEnabled: state.isEnabled,
+    );
   }
 }
 

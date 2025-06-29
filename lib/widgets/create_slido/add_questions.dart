@@ -6,6 +6,7 @@ class AddQuestions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height - 100,
@@ -14,7 +15,7 @@ class AddQuestions extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(
           side: BorderSide(
-            color: Colors.blue.withOpacity(0.5),
+            color: theme.colorScheme.primary.withValues(alpha: 0.5),
             width: 1,
           ),
           borderRadius: const BorderRadius.all(
@@ -26,16 +27,23 @@ class AddQuestions extends StatelessWidget {
           child: GestureDetector(
             onTap: () {
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const CreateQuestion()));
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateQuestion(),
+                ),
+              );
             },
-            child: const ListTile(
+            child: ListTile(
               leading: Icon(
                 Icons.add_circle,
-                color: Colors.blue,
+                color: theme.colorScheme.primary,
               ),
-              title: Text('Add Question'),
+              title: Text(
+                'Add Question',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.primary),
+              ),
             ),
           ),
         ),

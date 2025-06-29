@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:slido/Providers/firebase_provider.dart';
-import 'package:slido/Providers/shared_preferences_provider.dart';
+// import 'package:slido/Providers/shared_preferences_provider.dart';
 import 'package:slido/util/snack_bar.dart';
 
 class CreateQuestion extends ConsumerStatefulWidget {
@@ -29,7 +29,7 @@ class _CreateQuestionState extends ConsumerState<CreateQuestion> {
     super.dispose();
   }
 
-  String? email;
+  // String? email;
   List<dynamic> options = ['', ''];
   bool isChanged = false;
   String question = '';
@@ -125,7 +125,7 @@ class _CreateQuestionState extends ConsumerState<CreateQuestion> {
 
   @override
   Widget build(BuildContext context) {
-    email = ref.read(emailProvider);
+    // email = ref.read(emailProvider);
     return Scaffold(
       appBar: AppBar(
           title: const Text('Create quiz question'),

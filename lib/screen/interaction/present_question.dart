@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:slido/Providers/bottom_navigation_provider.dart';
 import 'package:slido/widgets/present_question/present_question_widget.dart';
 
-class PresentQuestionInteractiveMode extends StatefulWidget {
+class PresentQuestionInteractiveMode extends ConsumerStatefulWidget {
   const PresentQuestionInteractiveMode(
       {super.key,
       required this.question,
@@ -14,12 +16,12 @@ class PresentQuestionInteractiveMode extends StatefulWidget {
   final currentQuestion;
   final DocumentReference snapshot;
   @override
-  State<PresentQuestionInteractiveMode> createState() =>
+  ConsumerState<PresentQuestionInteractiveMode> createState() =>
       _PresentQuestionInteractiveModeState();
 }
 
 class _PresentQuestionInteractiveModeState
-    extends State<PresentQuestionInteractiveMode> {
+    extends ConsumerState<PresentQuestionInteractiveMode> {
   @override
   void initState() {
     // TODO: implement initState
@@ -43,6 +45,7 @@ class _PresentQuestionInteractiveModeState
   Timer? countdownTimer;
   int? time = 20;
   void startCountdown() {
+    ref.read(bottomNavigationButtonProvider).isEnabled = false;
     countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         if (time! > 0) {
@@ -50,6 +53,9 @@ class _PresentQuestionInteractiveModeState
             time = time! - 1;
           });
         } else {
+          setState(() {
+            ref.read(bottomNavigationButtonProvider).isEnabled = true;
+          });
           FirebaseFirestore.instance
               .collection('main')
               .doc(widget.snapshot.id)

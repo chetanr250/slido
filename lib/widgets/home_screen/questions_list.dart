@@ -1,14 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:slido/Providers/firebase_provider.dart';
-import 'package:slido/Providers/shared_preferences_provider.dart';
 import 'package:slido/screen/create/create_question.dart';
 
 class QuestionsList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final email = ref.read(emailProvider)!;
+    // final auth = FirebaseAuth.instance;
+    // final email = auth.currentUser?.email;
 
     return StreamBuilder(
       stream: ref.read(firebaseUsersProvider).snapshots(),
@@ -114,7 +115,7 @@ void deleteConfirmation(questions, index, context, ref) {
               size: 20,
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.blue,
             ),
             onPressed: () {
               Navigator.pop(context);
