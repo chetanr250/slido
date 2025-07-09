@@ -8,12 +8,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:slido/Providers/shared_preferences_provider.dart';
-// import 'package:slido/screen/home_screen.dart';
 import 'package:slido/util/snack_bar.dart';
 import 'package:slido/widgets/common/custom_snack_bar.dart';
 import '../../core/models/user.dart';
-// import '../../core/providers/user_provider.dart';
 import '../landing/landing_screen.dart';
 
 class Auth extends ConsumerStatefulWidget {
@@ -65,7 +62,7 @@ class _AuthState extends ConsumerState<Auth> {
         final userData = userDoc.data() as Map<String, dynamic>;
         user = AppUser.fromJson(userData);
         await usersCollection.doc(controller.text).update({
-          'device': await info(),
+          'zdevice': await info(),
         });
         // print(user);
         // ref.read(currentUserProvider.notifier).state = user;
@@ -86,7 +83,7 @@ class _AuthState extends ConsumerState<Auth> {
       // // Store user in provider and SharedPreferences
       // ref.read(currentUserProvider.notifier).state = user;
       prefs.setString('email', controller.text);
-
+// Navigator.of(context).push
       // Success feedback and navigation
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -114,6 +111,10 @@ class _AuthState extends ConsumerState<Auth> {
         message: 'Registration successful!',
         backgroundColor: Colors.green,
       );
+      // createFireContainer(context, ref);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LandingScreen()),
+      );
       // ScaffoldMessenger.of(context).showSnackBar(
       //   const SnackBar(
       //       content: Text('Registration successful!'),
@@ -135,10 +136,14 @@ class _AuthState extends ConsumerState<Auth> {
         email: email,
         password: password,
       );
+      createFireContainer(context, ref);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Sign in successful!'),
             backgroundColor: Colors.green),
+      );
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LandingScreen()),
       );
     } on FirebaseAuthException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

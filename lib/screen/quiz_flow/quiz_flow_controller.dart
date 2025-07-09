@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../core/models/room.dart';
 import '../../core/models/quiz_status.dart';
 import '../../core/providers/room_provider.dart';
 import 'waiting_room_screen.dart';
@@ -82,7 +81,7 @@ class QuizFlowController extends ConsumerWidget {
               extraStats: room.stats['extraStats'],
             );
           case QuizStatus.leaderboard:
-            final leaderboard = (room.leaderboard ?? [])
+            final leaderboard = (room.leaderboard)
                 .map((e) => LeaderboardEntry(
                       userEmail: e['userEmail'],
                       score: e['score'],

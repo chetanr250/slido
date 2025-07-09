@@ -15,16 +15,16 @@ class AppUser {
     return AppUser(
       email: json['email'] as String,
       device: json['device'] as Map<String, dynamic>?,
-      quizzes: (json['quizzes'] as List<dynamic>?)?.cast<String>() ?? [],
-      pastResults:
-          (json['pastResults'] as List<dynamic>?)?.cast<String>() ?? [],
+      // quizzes: (json['quizzes'] as List<dynamic>?)?.cast<String>() ?? [],
+      // pastResults:
+      //     (json['pastResults'] as List<dynamic>?)?.cast<String>() ?? [],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'email': email,
-      'device': device,
+      'zdevice': device,
       'quizzes': quizzes,
       'pastResults': pastResults,
     };

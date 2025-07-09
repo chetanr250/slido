@@ -6,10 +6,10 @@ class Quiz {
   final String name;
   final String createdBy;
   final DateTime createdAt;
-  final List<Question> questions; // question IDs
+  final List<Question> questions;
 
   Quiz({
-     this.id,
+    this.id,
     required this.name,
     required this.createdBy,
     required this.createdAt,
@@ -23,8 +23,7 @@ class Quiz {
       createdBy: json['createdBy'] as String,
       createdAt: (json['createdAt'] as Timestamp).toDate(),
       questions: (json['questions'] as List<dynamic>?)
-              ?.map((e) => Question.fromJson(
-                  e as Map<String, dynamic>, e['id']))
+              ?.map((q) => Question.fromJson(q as Map<String, dynamic>))
               .toList() ??
           [],
     );
@@ -36,6 +35,7 @@ class Quiz {
       'createdBy': createdBy,
       'createdAt': createdAt,
       'questions': questions.map((e) => e.toJson()).toList(),
+      'id': id,
     };
   }
 

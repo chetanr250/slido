@@ -21,14 +21,14 @@ import '../services/quiz_service.dart';
 //   return QuizActions(service);
 // });
 
-class QuizActions {
-  final QuizService _service;
-  QuizActions(this._service);
+// class QuizActions {
+//   final QuizService _service;
+//   QuizActions(this._service);
 
-  Future<String> createQuiz(Quiz quiz) => _service.createQuiz(quiz);
-  Future<String> addOrUpdateQuestion(Question question) =>
-      _service.addOrUpdateQuestion(question);
-  Future<void> deleteQuestion(String quizId, String questionId) =>
-      _service.deleteQuestion(quizId, questionId);
-  Future<void> deleteQuiz(String quizId) => _service.deleteQuiz(quizId);
-}
+//   Future<String> createNewQuiz(Quiz quiz) => _service.createNewQuiz(quiz);
+//   Future<String> addOrUpdateQuestion(Question question) =>
+//       _service.addOrUpdateQuestion(question: question);
+//   Future<void> deleteQuestion(String quizId, String questionId) =>
+//       _service.deleteQuestion(quizId, questionId);
+//   // Future<void> deleteQuiz(String quizId) => _service.deleteQuiz(quizId);
+// }

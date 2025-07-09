@@ -4,82 +4,52 @@ import '../models/quiz.dart';
 import '../models/question.dart';
 
 class QuizService {
-  final CollectionReference usersCollection =
-      FirebaseFirestore.instance.collection('users');
-  // final userDoc = usersCollection.doc(EMAIL);
+  final DocumentReference<Map<String, dynamic>> userDocRef =
+      FirebaseFirestore.instance.collection('users').doc(EMAIL);
 
   // // Create a new quiz under user document
-  Future<String> createQuiz(Quiz quiz) async {
-    final userEmail = EMAIL;
-    if (userEmail == null) throw Exception('User not authenticated');
+  Future<String> createNewQuiz(Quiz quiz) async {
+    final quizData = quiz.toJson();
 
-    final quizId = quiz.id ?? DateTime.now().millisecondsSinceEpoch.toString();
-    final quizData = quiz.copyWith(id: quizId).toJson();
-
-    await usersCollection.doc(userEmail).update({
+    await userDocRef.update({
       'quizzes': FieldValue.arrayUnion([quizData])
     });
-    return quizId ?? '';
+    return quiz.id!;
   }
 
   ////
   Future<void> submitQuizToFirebase(Quiz quiz, int index) async {
-    // print('submitQuizToFirebase');
-    // print(quiz.toJson());
-    // print(index);
-    final userEmail = EMAIL;
-    if (userEmail == null) throw Exception('User not authenticated');
-
-    final userDoc = await usersCollection.doc(userEmail).get();
+    final userDoc = await userDocRef.get();
     if (!userDoc.exists) throw Exception('User document not found');
 
     final quizzes =
         (userDoc.data() as Map<String, dynamic>)['quizzes'] as List<dynamic>;
 
-    // Update the quiz at the specified index
     quizzes[index] = quiz.toJson();
-
-    // Update the user document with the modified quizzes array
-    await usersCollection.doc(userEmail).update({'quizzes': quizzes});
+    await userDocRef.update({'quizzes': quizzes});
   }
 
-  // Get a quiz by ID
   Future<List<Quiz>> getQuiz() async {
-    final userEmail = EMAIL;
-    // print('getQuiz: $userEmail');
-    // print('getQuiz');
-    if (userEmail == null) throw Exception('User not authenticated');
-
-    final userDoc = await usersCollection.doc(userEmail).get();
-    // print('userDoc: ${(userDoc.data() as Map<String, dynamic>)['quizzes']}');
+    final userDoc = await userDocRef.get();
     if (!userDoc.exists) return [];
 
-    final quizzes = (userDoc.data() as Map<String, dynamic>)['quizzes']
-       ;
-    // print(quizzes.length);
-    // print('quizzes: $quizzes');
+    final quizzes = (userDoc.data() as Map<String, dynamic>)['quizzes'];
 
     List<Quiz> quizzesList = [];
     for (var i = 0; i < quizzes.length; i++) {
       try {
-        // print(quizzes[i]);
         quizzesList.add(Quiz.fromJson(quizzes[i]));
       } catch (e) {
         print('Error: $e');
       }
     }
-    // print(quizzesList);
-    // print('quizzesList: ${quizzesList.length}');
-    // print(quizzesList);
     return quizzesList;
   }
 
   // Add or update a question in a quiz
-  Future<String> addOrUpdateQuestion(Question question) async {
-    final userEmail = EMAIL;
-    if (userEmail == null) throw Exception('User not authenticated');
-
-    final userDoc = await usersCollection.doc(userEmail).get();
+  Future<String> addOrUpdateQuestion(
+      {required Question question, int? index}) async {
+    final userDoc = await userDocRef.get();
     if (!userDoc.exists) throw Exception('User document not found');
 
     final quizzes =
@@ -91,37 +61,16 @@ class QuizService {
 
     final quiz = quizzes[quizIndex] as Map<String, dynamic>;
     final questions = (quiz['questions'] as List<dynamic>?) ?? [];
-
-    final questionId = question.id.isEmpty
-        ? DateTime.now().millisecondsSinceEpoch.toString()
-        : question.id;
-
-    final questionData = question.copyWith(id: questionId).toJson();
-
-    // Update or add the question
-    final questionIndex = questions
-        .indexWhere((q) => (q as Map<String, dynamic>)['id'] == questionId);
-
-    if (questionIndex != -1) {
-      questions[questionIndex] = questionData;
-    } else {
-      questions.add(questionData);
-    }
-
-    quiz['questions'] = questions;
-    quizzes[quizIndex] = quiz;
-
-    await usersCollection.doc(userEmail).update({'quizzes': quizzes});
-
-    return questionId;
+    questions;
+    //TODO: Implement add and update questions (prefer to differenciate)
+    return Future.delayed(Duration.zero, () {
+      return "";
+    });
   }
 
   // Delete a question from a quiz
   Future<void> deleteQuestion(String quizId, String questionId) async {
-    final userEmail = EMAIL;
-    if (userEmail == null) throw Exception('User not authenticated');
-
-    final userDoc = await usersCollection.doc(userEmail).get();
+    final userDoc = await userDocRef.get();
     if (!userDoc.exists) throw Exception('User document not found');
 
     final quizzes =
@@ -140,42 +89,31 @@ class QuizService {
     quiz['questions'] = questions;
     quizzes[quizIndex] = quiz;
 
-    await usersCollection.doc(userEmail).update({'quizzes': quizzes});
+    await userDocRef.update({'quizzes': quizzes});
   }
 
-  // Get all questions for a quiz
-  Future<List<Question>> getQuestionsForQuiz(String quizId) async {
-    final userEmail = EMAIL;
-    if (userEmail == null) throw Exception('User not authenticated');
+  // // Get all questions for a quiz
+  // Future<List<Question>> getQuestionsForQuiz(String quizId) async {
+  //   final userDoc = await userDocRef.get();
+  //   if (!userDoc.exists) throw Exception('User document not found');
 
-    final userDoc = await usersCollection.doc(userEmail).get();
-    if (!userDoc.exists) throw Exception('User document not found');
-
-    final quizzes =
-        (userDoc.data() as Map<String, dynamic>)['quizzes'] as List<dynamic>;
-    final quiz = quizzes.firstWhere(
-      (q) => (q as Map<String, dynamic>)['id'] == quizId,
-      orElse: () => null,
-    );
-    if (quiz == null) throw Exception('Quiz not found');
-    final questions = (quiz['questions'] as List<dynamic>?) ?? [];
-    return questions
-        .map((q) => Question.fromJson(q as Map<String, dynamic>, (q)['id']))
-        .toList();
-  }
+  //   final quizzes =
+  //       (userDoc.data() as Map<String, dynamic>)['quizzes'] as List<dynamic>;
+  //   final quiz = quizzes.firstWhere(
+  //     (q) => (q as Map<String, dynamic>)['id'] == quizId,
+  //     orElse: () => null,
+  //   );
+  //   if (quiz == null) throw Exception('Quiz not found');
+  //   final questions = (quiz['questions'] as List<dynamic>?) ?? [];
+  //   // TODO: implement getQuestionsForQuiz
+  //   return questions as Future<List<Question>>;
+  // }
 
   // Delete a quiz
-  Future<void> deleteQuiz(String quizId) async {
-    final userEmail = EMAIL;
-    if (userEmail == null) throw Exception('User not authenticated');
-
-    final userDoc = await usersCollection.doc(userEmail).get();
-    if (!userDoc.exists) throw Exception('User document not found');
-
-    final quizzes =
-        (userDoc.data() as Map<String, dynamic>)['quizzes'] as List<dynamic>;
-    quizzes.removeWhere((q) => (q as Map<String, dynamic>)['id'] == quizId);
-
-    await usersCollection.doc(userEmail).update({'quizzes': quizzes});
+  Future<List<Quiz>> deleteQuiz(int index, List<Quiz> quizzes) async {
+    quizzes.removeAt(index);
+    final jsonQuizzes = quizzes.map((q) => q.toJson()).toList();
+    await userDocRef.update({'quizzes': jsonQuizzes});
+    return quizzes;
   }
 }
